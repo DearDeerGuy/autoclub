@@ -1,9 +1,6 @@
 package com.servlet.autoclub.models;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class Database {
     static String url = "jdbc:mysql://localhost:3306/carsclub";
@@ -54,4 +51,36 @@ public class Database {
         return conn != null && !conn.isClosed();
     }
     public static void Disconnect() throws SQLException { conn.close(); }
+    public static ResultSet GetResultSetFromSQL(String sql) {
+        Database.Connect();
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            Statement statement = Database.conn.createStatement();
+            statement.executeQuery(sql);
+            return statement.getResultSet();
+        } catch (ClassNotFoundException | SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static boolean GetResult(String sql) {
+        ResultSet resultSet = GetResultSetFromSQL(sql);
+        try {
+            if(resultSet.next())
+                return true;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return false;
+    }
+    public static boolean InsertFromSQL(String sql) {
+        Database.Connect();
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            Statement statement = Database.conn.createStatement();
+            statement.executeUpdate(sql);
+            return true;
+        } catch (ClassNotFoundException | SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -15,32 +15,50 @@ public class Car {
     public int year;
     public String fuel_type;
 
+    public Car(int id, int user_id, String name, String model, int year, String fuel_type) {
+        this.id = id;
+        this.user_id = user_id;
+        this.name = name;
+        this.model = model;
+        this.year = year;
+        this.fuel_type = fuel_type;
+    }
+    public Car(int user_id, String name, String model, int year, String fuel_type) {
+        this.user_id = user_id;
+        this.name = name;
+        this.model = model;
+        this.year = year;
+        this.fuel_type = fuel_type;
+    }
     public static List<Car> GetCars() {
-        Database.Connect();
         List<Car> cars = new ArrayList<>();
 
         try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Statement carsListStatement = Database.conn.createStatement();
             String selectCars = "SELECT * FROM cars";
-            carsListStatement.executeQuery(selectCars);
-            ResultSet carsSet = carsListStatement.getResultSet();
+            ResultSet carsSet = Database.GetResultSetFromSQL(selectCars);
             while (carsSet.next()) {
-                Car car = new Car();
-                car.id = carsSet.getInt("id");
-                car.user_id = carsSet.getInt("user_id");
-                car.name = carsSet.getString("name");
-                car.model = carsSet.getString("model");
-                car.year = carsSet.getInt("year");
-                car.fuel_type = carsSet.getString("fuel_type");
+                Car car = new Car(
+                        carsSet.getInt("id"),
+                        carsSet.getInt("user_id"),
+                        carsSet.getString("name"),
+                        carsSet.getString("model"),
+                        carsSet.getInt("year"),
+                        carsSet.getString("fuel_type")
+                );
                 cars.add(car);
             }
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return cars;
     }
-
+    public List<Comment> GetComments() {
+        return Comment.GetComments(id);
+    }
+    public static boolean AddCar(Car car) {
+        String addCar = "INSERT INTO cars(user_id, name, model, year, fuel_type) VALUES (" + car.user_id + ", '" + car.name + "', '" + car.model + "', " + car.year + ", '" + car.fuel_type + "')";
+        return Database.InsertFromSQL(addCar);
+    }
     @Override
     public String toString() {
         return this.name + " " + this.model + " " + this.year + " " + this.fuel_type;

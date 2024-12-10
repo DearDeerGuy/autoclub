@@ -1,10 +1,13 @@
 package com.servlet.autoclub.models;
 
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 public class User {
@@ -15,52 +18,55 @@ public class User {
     public Date join_date;
 
 
-    private static ResultSet ExecuteSQL(String sql) {
-        Database.Connect();
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Statement statement = Database.conn.createStatement();
-            statement.executeQuery(sql);
-            return statement.getResultSet();
-        } catch (ClassNotFoundException | SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    private static boolean GetResult(String sql) {
-        ResultSet resultSet = ExecuteSQL(sql);
-        try {
-            if(resultSet.next())
-                return true;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return false;
-    }
     public static boolean LoginUser(String username, String password) {
         String sql = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'";
-        return GetResult(sql);
+        return Database.GetResult(sql);
     }
     public static boolean IsEmailExist(String email) {
         String sql = "SELECT * FROM users WHERE email = '" + email + "'";
-        return GetResult(sql);
+        return Database.GetResult(sql);
     }
     public static boolean IsUsernameExist(String username) {
         String sql = "SELECT * FROM users WHERE username = '" + username + "'";
-        return GetResult(sql);
+        return Database.GetResult(sql);
     }
     public static boolean RegisterUser(String username, String password, String email) {
-        if(!IsUsernameExist(username) && !IsEmailExist(email)) {
-            String sql = "INSERT INTO users(username, password, email) VALUES ('" + username + "', '" + password + "', '" + email + "')";
-            Database.Connect();
-            try {
-                Class.forName("com.mysql.jdbc.Driver");
-                Statement statement = Database.conn.createStatement();
-                statement.executeUpdate(sql);
-                return true;
-            } catch (ClassNotFoundException | SQLException e) {
-                throw new RuntimeException(e);
-            }
+        if(IsUsernameExist(username) || IsEmailExist(email))
+            return false;
+        String sql = "INSERT INTO users(username, password, email) VALUES ('" + username + "', '" + password + "', '" + email + "')";
+        return Database.InsertFromSQL(sql);
+    }
+    public static boolean GetAuthorizationFromCookies(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null)
+            return false;
+        String login = "", password = "";
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals("login"))
+                login = cookie.getValue();
+            if(cookie.getName().equals("password"))
+                password = cookie.getValue();
         }
-        return false;
+        if(login.isEmpty() || password.isEmpty())
+            return false;
+        return LoginUser(login, password);
+    }
+    public static void AddUserToCookie(HttpServletResponse response, String login, String password) {
+        Cookie cookieLogin = new Cookie("login", login);
+        cookieLogin.setMaxAge(60 * 60 * 24);
+        response.addCookie(cookieLogin);
+
+        Cookie cookiePassword = new Cookie("password", password);
+        cookiePassword.setMaxAge(60 * 60 * 24);
+        response.addCookie(cookiePassword);
+    }
+    public static void Logout(HttpServletResponse response) {
+        Cookie cookieLogin = new Cookie("login", "");
+        cookieLogin.setMaxAge(0);
+        response.addCookie(cookieLogin);
+
+        Cookie cookiePassword = new Cookie("password", "password");
+        cookiePassword.setMaxAge(0);
+        response.addCookie(cookiePassword);
     }
 }
