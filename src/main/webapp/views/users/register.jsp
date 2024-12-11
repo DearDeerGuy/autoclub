@@ -2,21 +2,27 @@
 <html>
 <head>
     <title>Register</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/styles/style.css">
 </head>
 <body>
-  <form id="myForm" method="post">
-    <input type="hidden" name="action" value="register" />
-    <label>Email
-      <input name="email" type="email">
-    </label>
-    <label>Username
-      <input name="username" type="text">
-    </label>
-    <label>Password
-      <input name="password" type="password">
-    </label>
-    <button type="submit">Register</button>
-  </form>
-  <a href="users?action=login"><button>Login</button></a>
+    <main>
+        <form method="post" class="authform">
+            <h1>REGISTER</h1>
+            <input type="hidden" name="action" value="register">
+            <label>Email
+              <input name="email" type="email" required>
+            </label>
+            <label>Username
+              <input name="username" type="text" required>
+            </label>
+            <label>Password
+              <input name="password" type="password" required>
+            </label>
+            <div class="buttons">
+              <button type="submit">Register</button>
+              <span>Have an account? <a href="users?action=login">Login</a></span>
+            </div>
+        </form>
+    </main>
 </body>
 </html>

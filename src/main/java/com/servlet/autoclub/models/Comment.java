@@ -12,14 +12,16 @@ public class Comment {
     public int car_id;
     public int user_id;
     public String comment_text;
-    public Date create_at;
+    public Date created_at;
+    public User user;
 
-    public Comment(int id, int car_id, int user_id, String comment_text, Date create_at) {
+    public Comment(int id, int car_id, int user_id, String comment_text, Date created_at) {
         this.id = id;
         this.car_id = car_id;
         this.user_id = user_id;
         this.comment_text = comment_text;
-        this.create_at = create_at;
+        this.created_at = created_at;
+        this.user = User.GetUser(user_id);
     }
     public static List<Comment> GetComments(int car_id) {
         List<Comment> comments = new ArrayList<>();
@@ -32,7 +34,7 @@ public class Comment {
                         commentsSet.getInt("car_id"),
                         commentsSet.getInt("user_id"),
                         commentsSet.getString("comment_text"),
-                        commentsSet.getDate("create_at")
+                        commentsSet.getTimestamp("created_at")
                 );
                 comments.add(comment);
             }
@@ -42,7 +44,7 @@ public class Comment {
         return comments;
     }
     public static boolean AddComment(Comment comment) {
-        String addCar = "INSERT INTO comments(car_id, user_id, comment_text, create_at) VALUES (" + comment.car_id + ", " + comment.user_id + ", '" + comment.comment_text + "', '" + comment.create_at + "')";
+        String addCar = "INSERT INTO comments(car_id, user_id, comment_text, created_at) VALUES (" + comment.car_id + ", " + comment.user_id + ", '" + comment.comment_text + "', '" + comment.created_at + "')";
         return Database.InsertFromSQL(addCar);
     }
 }

@@ -17,7 +17,6 @@ public class User {
     public String email;
     public Date join_date;
 
-
     public static boolean LoginUser(String username, String password) {
         String sql = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'";
         return Database.GetResult(sql);
@@ -68,5 +67,31 @@ public class User {
         Cookie cookiePassword = new Cookie("password", "password");
         cookiePassword.setMaxAge(0);
         response.addCookie(cookiePassword);
+    }
+    public static User ParseUserFromSet(ResultSet userSet) {
+        try {
+            if (userSet.next()) {
+                User user = new User();
+                user.id = userSet.getInt("id");
+                user.username = userSet.getString("username");
+                user.password = userSet.getString("password");
+                user.email = userSet.getString("email");
+                user.join_date = userSet.getDate("join_date");
+                return user;
+            }
+            return null;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static User GetUser(String username, String password) {
+        String sql = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'";
+        ResultSet userSet = Database.GetResultSetFromSQL(sql);
+        return  ParseUserFromSet(userSet);
+    }
+    public static User GetUser(int id) {
+        String sql = "SELECT * FROM users WHERE id = " + id;
+        ResultSet userSet = Database.GetResultSetFromSQL(sql);
+        return  ParseUserFromSet(userSet);
     }
 }

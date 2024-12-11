@@ -11,15 +11,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.lang.*;
 
 import java.io.*;
-import java.net.URLDecoder;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 
 @WebServlet(name = "usersServlet", value = "/users")
 public class UsersServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+
         String action = request.getParameter("action") == null ? "login" : request.getParameter("action");
         if(User.GetAuthorizationFromCookies(request) && !action.equals("logout")) {
             response.sendRedirect("/cars");
@@ -47,8 +45,11 @@ public class UsersServlet extends HttpServlet {
 
         String action = request.getParameter("action") == null ? "login" : request.getParameter("action");
 
-        if(username.isEmpty() || password.isEmpty() || (action.equals("register") && email.isEmpty()))
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Empty inputs");
+        if(username.isEmpty() || username == null || password.isEmpty() || password == null || (action.equals("register") && email.isEmpty())) {
+            response.sendRedirect("/users");
+            return;
+        }
+
 
         switch(action) {
             case "login":
